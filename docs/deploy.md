@@ -1,41 +1,54 @@
-# 部署指南（国内直连优先）
+# 部署指南（实际路线：Zion 静态托管 + 浏览器直连明道云）
 
-> 硬约束：体验链接要给国内评委打开。需要「国内直连 + 自带 HTTPS 域名（免备案）+ 能跑 Node/容器」。
-> 海外平台（Vercel/Netlify/Render/Fly 等默认域名在国内时通时断）不推荐。
+> 2026-09-20 定稿：项目最终采用「**Zion Static Site Hosting 托管前端 + 浏览器直连明道云 v2 开放 API**」。
+> 无需任何服务器：前端是纯静态文件，数据面由明道云官方 API（应用授权密钥 appKey/sign，官方支持 CORS）承担。
 
-## 路线 A（推荐）：腾讯云 CloudBase 云托管（CloudBase Run）
+## 架构（零服务器）
 
-理由：国内直连、平台提供 HTTPS 默认域名（`*.tcloudbaseapp.com`，免备案）、按量计费（新用户有试用额度，跑这个 demo 每天几分钱量级）、支持直接从 GitHub 导入或上传镜像/代码。
+```
+浏览器（评委/用户）
+  ├─ 静态页面      ← Zion static site（*.cave.functorz-app.com，国内直连）
+  └─ 数据读写      ← 直连 api.mingdao.com/v2/open/worksheet/*（appKey+sign 随请求体）
+```
 
-步骤：
-1. 微信扫码登录 [腾讯云 CloudBase 控制台](https://tcb.cloud.tencent.com/)（需实名认证，个人即可）。
-2. 创建云开发环境（按量付费环境即可）。
-3. 云托管 → 新建服务：
-   - 接入方式：**GitHub 仓库**（选 `jqu224/private-persona-dash-eg`）或「上传代码」/ 镜像（仓库里有 `Dockerfile`，直接选 Dockerfile 构建）
-   - 监听端口：`8080`（平台会注入 `PORT` 环境变量，服务自动适配）
-   - 实例副本数：最小 0（省钱，冷启动几秒）或最小 1（演示期更稳）
-4. 配置环境变量：把 `server/.env` 里的键值逐条填入（MINGDAO_PAT / MD_APP_ID / MD_WS_* / AI_API_KEY 可选）。
-5. 发布版本 → 拿到默认域名 URL（HTTPS）→ 发给我，我接着配明道云嵌入。
+- 前端 `web/` 构建产物由 Zion CLI `site deploy` 部署（见下）。
+- 数据全部落在明道云工作表；字段别名在明道云里设置一次即可。
+- **安全边界**：`appKey/sign` 是应用级授权密钥（官方设计用于外部门户等 C 端直连场景），可以放前端；
+  PAT（个人访问令牌）代表个人身份，绝不可放前端——它只在本地开发模式（server/ 代理）使用。
 
-## 路线 B：Sealos 容器云（最快，3 分钟）
+## 步骤
 
-理由：国内节点直连、支付宝充值几块钱即可、无备案、自带 HTTPS 域名。
+### 1. 明道云准备（一次性）
+- 一键建表 + 种子数据：`node scripts/seed-mingdao.mjs`（走 PAT + MCP 通道）
+- 应用内「API 开发文档 → 应用授权 → 新建授权密钥」拿 `appKey` / `sign`
 
-步骤：
-1. 登录 [sealos.run](https://sealos.run)（手机号即可）→ 充值最低额度。
-2. 「应用管理」→ 部署应用 → 镜像：本地 `docker build -t persona-dash .` 后推到任意镜像仓库（或用 Sealos 的代码构建）。
-3. 端口 8080 → 开公网 → 得到 HTTPS 域名。
-4. 环境变量同上。
+### 2. 前端配置
+- 复制 `web/public/config.example.js` 为 `config.js`（实例仓库已放真实值）
+- 填 `appKey` / `sign` 和每张表的 `worksheetId` / `viewId`（seed 脚本会写进 server/.env，视图 ID 用各表「全部」视图）
 
-## 路线 C（兜底，仅演示视频用）：本机运行 + 内网穿透
+### 3. Zion 部署
+```bash
+cd web && npm install && npm run build
+# 把实例 config.js 覆盖进构建产物
+cp ../persona-dash-eg/web/public/config.js dist/config.js   # 实例仓库路径按实际调整
+# 登录（开浏览器一次性授权）
+npx -y zion-mcp@2.7.7 login --no-daemon
+npx -y zion-mcp@2.7.7 project set-current --projectExId <Zion项目ExId>
+npx -y zion-mcp@2.7.7 site deploy --dir web/dist --target BETA --no-daemon
+```
+返回的 `siteUrl` 即体验链接（HTTPS，国内直连）。`--target PROD` 需要人工在 GUI 确认。
 
-`node server/index.js` + cpolar/花生壳/飞牛等穿透工具拿临时 HTTPS 域名。**不适合评委长期体验**（电脑要一直开机、带宽小），只用于录制演示视频。
+### 4. 明道云嵌入（加分项）
+应用内新建自定义页面 → 用「嵌入 URL」组件放体验链接 → 可按需开启公开分享（仅应用管理员，UI 操作）。
+（也可用 MCP：`create_app_items` 建页面 + `update_custom_page` 放 `componentType:"html"` 组件。）
 
-## 不推荐
+## 历史路线（已弃用，留档）
 
-- Vercel / Netlify / Render / Fly.io / Cloudflare Pages：默认域名在国内不稳或被污染，评委打不开的风险不可接受。
-- GitHub Pages：纯静态，承载不了 API 代理。
+- Zeabur / CloudBase / Sealos 服务器方案：见 git 历史 `docs/deploy.md` 早期版本。因「零服务器直连」可行且更优雅而弃用。
+- 本地代理 server/：保留用于开发（PAT + 智谱 AI），生产不需要它。
 
-## 部署完成后
+## 常见问题
 
-把 HTTPS URL 发给助手：会用明道云 MCP 的 `create_custom_page` 在应用里自动建「嵌入 URL」自定义页面并开启公开分享，无需手动操作。
+- **页面显示「当前为本地演示数据」**：config.js 没被加载或缓存。检查 `index.html` 里 `<script src="/config.js?v=N">` 的版本号，改号后重新部署。
+- **明道云 API 报 10001 参数缺少**：v2 接口的 `appKey/sign` 必须放在 JSON body；`rowid` 是小写；单选字段直接传字符串。
+- **AI 能力在直连模式下不可用**：AI 走本地代理（server/）或后续接 Zion BaaS 行为流；前端已内置本地兜底，功能不缺失。
