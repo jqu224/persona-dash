@@ -1,0 +1,10 @@
+node_modules
+web/node_modules
+web/.tmp
+ref
+gui-test-screenshots
+docs
+mingdao-seed
+scripts
+README*
+.git
