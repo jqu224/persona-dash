@@ -1,5 +1,5 @@
 /** 棋盘/网格引擎：2048 / 记忆翻牌 / 点灯 / 数字华容道 / 扫雷 / 色块泛滥 / 四宫数独 / 色彩找不同 */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { EngineProps, GameOver, ScoreBar, randInt, shuffle, useBest } from './util';
 
@@ -35,8 +35,13 @@ export function G2048({ id, params }: EngineProps) {
   const [dead, setDead] = useState(false);
   const [best, submit] = useBest(id);
 
+  /* 状态镜像：键盘监听只绑一次，move 始终读最新棋盘（否则连续移动会丢步） */
+  const live = useRef({ grid, score });
+  live.current = { grid, score };
+
   const move = (dir: 'up' | 'down' | 'left' | 'right') => {
-    const g = grid.map(row => [...row]);
+    const cur = live.current;
+    const g = cur.grid.map(row => [...row]);
     let gained = 0;
     const mergeLine = (line: number[]) => {
       const nums = line.filter(v => v);
@@ -62,10 +67,11 @@ export function G2048({ id, params }: EngineProps) {
         });
       }
     }
-    if (JSON.stringify(g) === JSON.stringify(grid)) return;
+    if (JSON.stringify(g) === JSON.stringify(cur.grid)) return;
     addTile(g);
     if (gained) setScore(s => s + gained);
     setGrid(g);
+    live.current = { grid: g, score: cur.score + gained };
     if (emptyCells(g).length === 0) {
       let canMove = false;
       for (let r = 0; r < n && !canMove; r += 1) {
@@ -76,7 +82,7 @@ export function G2048({ id, params }: EngineProps) {
       }
       if (!canMove) {
         setDead(true);
-        submit(score + gained);
+        submit(cur.score + gained);
       }
     }
   };
@@ -96,14 +102,34 @@ export function G2048({ id, params }: EngineProps) {
     window.addEventListener('keydown', onKey, { passive: false });
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [score]);
+  }, []);
+
+  /* 触屏滑动（手机端） */
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
 
   return (
     <div>
       <div className="m-kicker">2048</div>
       <h2>合并到 2048（或更高）</h2>
       <ScoreBar score={score} best={best} />
-      <div className="g2048" style={{ gridTemplateColumns: `repeat(${n}, 1fr)` }}>
+      <div
+        className="g2048"
+        style={{ gridTemplateColumns: `repeat(${n}, 1fr)` }}
+        onTouchStart={ev => {
+          const t = ev.touches[0];
+          touchStart.current = { x: t.clientX, y: t.clientY };
+        }}
+        onTouchEnd={ev => {
+          const st0 = touchStart.current;
+          if (!st0) return;
+          const t = ev.changedTouches[0];
+          const dx = t.clientX - st0.x;
+          const dy = t.clientY - st0.y;
+          if (Math.abs(dx) < 24 && Math.abs(dy) < 24) return;
+          if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'right' : 'left');
+          else move(dy > 0 ? 'down' : 'up');
+        }}
+      >
         {grid.flatMap((row, r) =>
           row.map((v, c) => (
             <div
