@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ComponentType } from 'react';
 
 import { TOPICS } from '@/data/onboarding';
 import { useBaseData } from '@/lib/base-data';
@@ -6,10 +7,48 @@ import { WORDS } from '@/data/words';
 import { getCalmExercise } from '@/data/calm';
 import { REFRESH_SHAPES } from '@/data/refresh';
 import { FACTS as COLD_FACTS } from '@/data/facts';
+import { gameById } from '@/data/games';
+import { TESTS } from '@/data/tests';
+import { transformBall, ZOOM_LABEL, ZOOM_METER } from '@/data/ball';
+import { useMemo } from 'react';
+import { Breakout, Dodge, Pong, Snake, Tetris } from '@/games/canvasGames';
+import { ColorFind, Fifteen, Flood, G2048, LightsOut, Memory, Minesweeper, Sudoku4 } from '@/games/gridGames';
+import { Hanoi, MathFlash, Peg, Reaction, Sequence, Simon, Span, Whack } from '@/games/mindGames';
+import { Trivia, Typing, WordQuiz, Wordle } from '@/games/wordGames';
+import type { EngineProps } from '@/games/util';
 
 interface WidgetBodyProps {
   id: string;
 }
+
+/* ===== 引擎组件路由表（games.ts 的 engine 字段 → 组件） ===== */
+const ENGINES: Record<string, ComponentType<EngineProps>> = {
+  snake: Snake,
+  breakout: Breakout,
+  tetris: Tetris,
+  pong: Pong,
+  dodge: Dodge,
+  g2048: G2048,
+  memory: Memory,
+  lights: LightsOut,
+  fifteen: Fifteen,
+  mines: Minesweeper,
+  flood: Flood,
+  sudoku4: Sudoku4,
+  colorfind: ColorFind,
+  hanoi: Hanoi,
+  simon: Simon,
+  math: MathFlash,
+  seq: Sequence,
+  span: Span,
+  whack: Whack,
+  reaction: Reaction,
+  peg: Peg,
+  wordle: Wordle,
+  typing: Typing,
+  wordquiz: WordQuiz,
+  trivia: Trivia,
+};
 
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
@@ -516,7 +555,193 @@ function FactWidget() {
 }
 
 /* ===== 分发器 ===== */
+/* ===== 人格测试 Runner（tests.ts 权重计分） ===== */
+interface TestOption {
+  t: string;
+  w: Record<string, number>;
+}
+interface TestQuestion {
+  q: string;
+  options: TestOption[];
+}
+interface TestResult {
+  key: string;
+  name: string;
+  color: string;
+  desc: string;
+}
+interface TestDef {
+  id: string;
+  title: string;
+  desc: string;
+  color: string;
+  resolve: (c: Record<string, number>) => TestResult;
+  questions: TestQuestion[];
+}
+const TEST_LIST = TESTS as unknown as TestDef[];
+
+function TestRunner({ testId }: { testId: string }) {
+  const test = TEST_LIST.find(t => t.id === testId) ?? TEST_LIST[0];
+  const [idx, setIdx] = useState(0);
+  const [counters, setCounters] = useState<Record<string, number>>({});
+  const [picked, setPicked] = useState<number | null>(null);
+  const [result, setResult] = useState<TestResult | null>(null);
+
+  const q = test.questions[idx];
+
+  const answer = (i: number) => {
+    if (picked !== null) return;
+    setPicked(i);
+    setCounters(prev => {
+      const next = { ...prev };
+      for (const [k, v] of Object.entries(q.options[i].w)) next[k] = (next[k] ?? 0) + v;
+      return next;
+    });
+  };
+
+  const nextQ = () => {
+    if (idx + 1 < test.questions.length) {
+      setIdx(idx + 1);
+      setPicked(null);
+    } else {
+      setResult(test.resolve(counters));
+    }
+  };
+
+  const reset = () => {
+    setIdx(0);
+    setCounters({});
+    setPicked(null);
+    setResult(null);
+  };
+
+  if (result) {
+    return (
+      <div>
+        <div className="m-kicker">{test.title}</div>
+        <h2>你的结果</h2>
+        <div className="panel">
+          <b style={{ color: `var(--${result.color === 'carmine' ? 'red' : result.color})` }}>{result.name}</b>
+          <p style={{ marginTop: 8, lineHeight: 1.8 }}>{result.desc}</p>
+        </div>
+        <div className="m-actions">
+          <button className="ok" onClick={reset}>
+            重新测
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="m-kicker">{test.title}</div>
+      <h2>
+        第 {idx + 1} / {test.questions.length} 题
+      </h2>
+      <p className="m-desc" style={{ fontSize: 14.5 }}>{q.q}</p>
+      <div>
+        {q.options.map((o, i) => (
+          <button key={o.t} className="opt" disabled={picked !== null} onClick={() => answer(i)}>
+            {o.t}
+          </button>
+        ))}
+      </div>
+      <div className="m-actions">
+        {picked !== null ? (
+          <button className="ok" onClick={nextQ}>
+            {idx + 1 < test.questions.length ? '下一题' : '看结果'}
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+/* ===== 变形球（程序化像素生成器） ===== */
+function BallToy() {
+  const [f, setF] = useState(0);
+  const [r, setR] = useState(0);
+  const [z, setZ] = useState(0);
+  const { seed, mode, lines, rot, zoom } = useMemo(() => transformBall(f, r, z), [f, r, z]);
+  const flags = [`--${mode.cmd}`, '--seed', String(seed).padStart(4, '0')];
+  if (rot) flags.push('--rot', String(rot * 90));
+  if (zoom) flags.push('--zoom', String((ZOOM_LABEL as Record<number, string>)[zoom]));
+  const terminal = [
+    `$ morph.ball ${flags.join(' ')}`,
+    '',
+    ...lines,
+    '',
+    `> 图案 No.${seed + 1} · ${mode.name}`,
+    `> 视野 ${ZOOM_METER[zoom + 2]} ${(ZOOM_LABEL as Record<number, string>)[zoom]}${rot ? ` · 旋转 ${rot * 90}°` : ''}`,
+    '> 变 换一张 · 转 旋转 90° · 缩放看细节',
+  ].join('\n');
+  return (
+    <div>
+      <div className="m-kicker">变形球</div>
+      <h2>{mode.name} · 解压疗愈小玩具</h2>
+      <p className="m-desc">{mode.caption}</p>
+      <pre className="ballterm">{terminal}</pre>
+      <div className="ball-ops">
+        <button className="mbtn" onClick={() => setF(seed + 1)}>变！</button>
+        <button className="mbtn ghost" onClick={() => setR(v => v + 1)}>转 90°</button>
+        <button className="mbtn ghost" onClick={() => setZ(v => Math.min(2, v + 1))}>放大</button>
+        <button className="mbtn ghost" onClick={() => setZ(v => Math.max(-2, v - 1))}>缩小</button>
+      </div>
+    </div>
+  );
+}
+
+/* ===== 石头剪刀布 ===== */
+const MOVES = ['rock', 'scissors', 'paper'] as const;
+type Move = (typeof MOVES)[number];
+const MOVE_NAME: Record<Move, string> = { rock: '石头', scissors: '剪刀', paper: '布' };
+const BEATS: Record<Move, Move> = { rock: 'scissors', scissors: 'paper', paper: 'rock' };
+
+function RpsToy() {
+  const [score, setScore] = useState({ w: 0, l: 0, d: 0 });
+  const [last, setLast] = useState<string | null>(null);
+
+  const play = (m: Move) => {
+    const bot = MOVES[Math.floor(Math.random() * MOVES.length)];
+    const result = m === bot ? 'd' : BEATS[m] === bot ? 'w' : 'l';
+    setScore(s => ({ ...s, [result]: s[result] + 1 }));
+    setLast(
+      `你出${MOVE_NAME[m]}，AI 出${MOVE_NAME[bot]} · ${result === 'w' ? '你赢了！' : result === 'l' ? 'AI 赢了。' : '平局。'}`,
+    );
+  };
+
+  return (
+    <div>
+      <div className="m-kicker">石头剪刀布</div>
+      <h2>和 AI 来一局</h2>
+      <div className="rps-score">
+        <span>胜<b>{score.w}</b></span>
+        <span>负<b>{score.l}</b></span>
+        <span>平<b>{score.d}</b></span>
+      </div>
+      <div className="rps-moves">
+        {MOVES.map(m => (
+          <button key={m} onClick={() => play(m)}>
+            {MOVE_NAME[m]}
+          </button>
+        ))}
+      </div>
+      {last ? <div className="panel">{last}</div> : null}
+    </div>
+  );
+}
+
 export default function WidgetBody({ id }: WidgetBodyProps) {
+  /* 游戏中心注册表路由：优先按 games.ts 的 engine 分发 */
+  const game = gameById(id);
+  if (game) {
+    if (game.engine === 'test') return <TestRunner testId={String(game.params?.test ?? 'mbti')} />;
+    if (game.engine === 'ball') return <BallToy />;
+    if (game.engine === 'rps') return <RpsToy />;
+    const Engine = ENGINES[game.engine];
+    if (Engine) return <Engine id={game.id} params={game.params ?? {}} />;
+  }
   switch (id) {
     case 'quiz':
       return <QuizWidget />;

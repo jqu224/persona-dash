@@ -62,9 +62,9 @@ export const DOP: Record<string, IDopColor> = {
   red: { fg: '#dc2626', bg: '#fee2e2' },
   teal: { fg: '#0f766e', bg: '#ccfbf1' },
   amber: { fg: '#d97706', bg: '#fef3c7' },
+  violet: { fg: '#7c3aed', bg: '#ede9fe' },
+  indigo: { fg: '#4f46e5', bg: '#e0e7ff' },
 };
-
-/* 深色主题用的霓虹变体（高亮荧光色 + 半透明深底） */
 export const DOP_DARK: Record<string, IDopColor> = {
   green: { fg: '#6ee7a0', bg: 'rgba(34,197,94,.16)' },
   blue: { fg: '#4dd4e8', bg: 'rgba(6,190,215,.18)' },
@@ -76,6 +76,8 @@ export const DOP_DARK: Record<string, IDopColor> = {
   red: { fg: '#ff7a7c', bg: 'rgba(255,86,88,.16)' },
   teal: { fg: '#5ee0c4', bg: 'rgba(20,162,152,.16)' },
   amber: { fg: '#ffc766', bg: 'rgba(255,210,31,.14)' },
+  violet: { fg: '#b79dff', bg: 'rgba(124,58,237,.18)' },
+  indigo: { fg: '#a5b4fc', bg: 'rgba(79,70,229,.18)' },
 };
 
 export function dopOf(key: string, isDark: boolean): IDopColor {

@@ -2438,3 +2438,499 @@ nav.side {
   transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0 var(--edge);
 }
+
+/* ===== 游戏中心 2.0（分类×类型矩阵 + 益智游戏库） ===== */
+/* 头部：标题行 + 右上分组切换 */
+.games-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 18px 0 26px;
+}
+.group-switch {
+  display: inline-flex;
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 3px 3px 0 var(--edge);
+  flex: none;
+}
+.group-switch .gs {
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--sub);
+  font-family: var(--font);
+}
+.group-switch .gs + .gs {
+  border-left: 2px solid var(--edge);
+}
+.group-switch .gs.on {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+}
+.sec-ico .mi {
+  width: 17px;
+  height: 17px;
+  margin-right: 4px;
+  color: var(--blue);
+}
+/* 游戏弹窗加宽 */
+.modal.game-modal {
+  max-width: 600px;
+}
+/* 通用：画布 / 分数条 / 结算 */
+.g-canvas {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 12px auto 0;
+  border: 2.5px solid var(--edge);
+  border-radius: 12px;
+  background: var(--card);
+  touch-action: none;
+}
+.g-scorebar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+.g-scorebar span {
+  background: var(--soft);
+  border: 1.5px solid var(--edge-soft);
+  border-radius: 9px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: var(--sub);
+}
+.g-scorebar b {
+  color: var(--text);
+  font-size: 14px;
+}
+.g-over {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text);
+  align-self: center;
+  margin-right: 8px;
+}
+/* 2048 */
+.g2048 {
+  display: grid;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  padding: 8px;
+  border-radius: 12px;
+  border: 2px solid var(--edge);
+  max-width: 400px;
+  margin: 12px auto 0;
+  touch-action: none;
+}
+.t2048 {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 900;
+  font-family: Menlo, monospace;
+}
+/* 记忆翻牌 */
+.memory {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+  margin: 12px auto 0;
+}
+.mcard {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid var(--edge);
+  background: var(--card);
+  font-size: 26px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+.mcard.open {
+  background: var(--yellow-bg);
+  transform: rotateY(0) scale(0.96);
+}
+.mcard.done {
+  background: var(--green-bg);
+  opacity: 0.75;
+  cursor: default;
+}
+/* 点灯 */
+.lights {
+  display: grid;
+  gap: 8px;
+  max-width: 360px;
+  margin: 12px auto 0;
+}
+.light {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid var(--edge);
+  background: var(--soft);
+  cursor: pointer;
+}
+.light.on {
+  background: #ffd21f;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+/* 数字华容道 */
+.fifteen {
+  display: grid;
+  gap: 7px;
+  max-width: 340px;
+  margin: 12px auto 0;
+}
+.ftile {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid var(--edge);
+  background: var(--card);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--edge);
+}
+.ftile.empty {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--edge-soft);
+  box-shadow: none;
+  cursor: default;
+}
+/* 扫雷 */
+.mines {
+  display: grid;
+  gap: 3px;
+  max-width: 420px;
+  margin: 12px auto 0;
+}
+.mcell {
+  aspect-ratio: 1;
+  border: 1.5px solid var(--edge-soft);
+  border-radius: 5px;
+  background: var(--soft);
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mcell.open {
+  background: var(--card);
+  cursor: default;
+}
+/* 色块泛滥 */
+.flood {
+  display: grid;
+  gap: 2px;
+  max-width: 400px;
+  margin: 12px auto 0;
+}
+.fcell {
+  aspect-ratio: 1;
+  border-radius: 3px;
+}
+.fbtn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 2px solid var(--edge);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--edge);
+}
+/* 四宫数独 */
+.sudoku4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  max-width: 300px;
+  margin: 12px auto 0;
+}
+.scell {
+  aspect-ratio: 1;
+  border: 2px solid var(--edge-soft);
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  color: var(--text);
+  font-family: Menlo, monospace;
+}
+.scell.given {
+  background: var(--soft);
+  cursor: default;
+}
+.scell.a {
+  border-color: var(--edge);
+}
+/* 色彩找不同 */
+.colorfind {
+  display: grid;
+  gap: 6px;
+  max-width: 380px;
+  margin: 12px auto 0;
+}
+.cfcell {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 2px solid var(--edge);
+  cursor: pointer;
+}
+/* 汉诺塔 */
+.hanoi {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 12px 0 4px;
+}
+.tower {
+  flex: 1;
+  max-width: 150px;
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+  background: var(--soft);
+  padding: 8px 6px 6px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.tower.sel {
+  outline: 3px solid var(--blue);
+}
+.towerslots {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+  align-items: center;
+  min-height: 120px;
+  justify-content: flex-start;
+}
+.disk {
+  border-radius: 7px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: center;
+  padding: 4px 0;
+  border: 1.5px solid rgba(0, 0, 0, 0.2);
+}
+.tbase {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--sub-2);
+  border-top: 2px solid var(--edge-soft);
+  padding-top: 4px;
+}
+/* 记忆旋律 */
+.simon {
+  display: grid;
+  gap: 10px;
+  max-width: 340px;
+  margin: 12px auto 0;
+}
+.skey {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid var(--edge);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--sub);
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+.skey:active {
+  transform: scale(0.94);
+}
+/* 算术/序列 */
+.mathq {
+  text-align: center;
+  font-size: 30px;
+  font-weight: 900;
+  font-family: Menlo, monospace;
+  margin: 16px 0;
+}
+.ballopts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.ballopts button {
+  min-width: 84px;
+  padding: 12px;
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+  background: var(--card);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  cursor: pointer;
+  font-family: Menlo, monospace;
+  box-shadow: 3px 3px 0 var(--edge);
+}
+.seqrow {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+.seqcell {
+  min-width: 46px;
+  height: 46px;
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 900;
+  background: var(--card);
+  font-family: Menlo, monospace;
+}
+.seqcell.q {
+  background: var(--yellow-bg);
+}
+/* 打地鼠 */
+.whack {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 330px;
+  margin: 12px auto 0;
+}
+.mole {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid var(--edge);
+  background: var(--soft);
+  font-size: 30px;
+  cursor: pointer;
+}
+/* 反应测试 */
+.reactpad {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin: 14px auto 0;
+  padding: 44px 16px;
+  border-radius: 14px;
+  border: 2.5px solid var(--edge);
+  background: var(--soft);
+  font-size: 19px;
+  font-weight: 900;
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--font);
+  box-shadow: 4px 4px 0 var(--edge);
+}
+.reactpad.wait {
+  background: #fee2e2;
+}
+.reactpad.go {
+  background: #86efac;
+}
+/* 孔明棋 */
+.peg {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  max-width: 350px;
+  margin: 12px auto 0;
+}
+.pegcell {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1.5px solid var(--edge-soft);
+  background: var(--card);
+  cursor: pointer;
+  padding: 0;
+}
+.pegcell.void {
+  visibility: hidden;
+}
+.pegcell.on {
+  background: #ffd21f;
+  border-color: var(--edge);
+  box-shadow: 1.5px 1.5px 0 var(--edge);
+}
+.pegcell.sel {
+  outline: 3px solid var(--blue);
+}
+/* Wordle */
+.wordle {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  margin: 12px auto 0;
+}
+.wrow {
+  display: flex;
+  gap: 6px;
+}
+.wcell {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--edge-soft);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  font-weight: 900;
+  font-family: Menlo, monospace;
+}
+.wcell.typing {
+  border-color: var(--edge);
+}
+.wcell.g {
+  background: #22c55e;
+  color: #fff;
+  border-color: var(--edge);
+}
+.wcell.y {
+  background: #ffd21f;
+  border-color: var(--edge);
+}
+.wcell.b {
+  background: var(--soft);
+  color: var(--sub-2);
+}
+/* 打字练习 */
+.typebox {
+  background: var(--soft);
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: Menlo, monospace;
+  font-size: 15px;
+  line-height: 2;
+  max-height: 150px;
+  overflow-y: auto;
+  margin-top: 12px;
+}
+.tchar.ok {
+  color: var(--ok);
+}
+.tchar.bad {
+  color: var(--danger);
+  background: var(--danger-bg);
+  border-radius: 3px;
+}
+.tchar.cur {
+  border-bottom: 2.5px solid var(--edge);
+}

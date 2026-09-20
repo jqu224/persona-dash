@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 
 import Mi from '@/components/workbench/Mi';
 import { ITaskView, IMyTask, ModalState } from '@/data/onboarding';
+import { gameById } from '@/data/games';
 import { useBaseData } from '@/lib/base-data';
 import WidgetBody from './WidgetBody';
 
@@ -171,9 +172,11 @@ function RoleModal({ onChoose, onClose }: { onChoose: (id: string) => void; onCl
 
 /* ===== 小工具容器 ===== */
 function WidgetModal({ id, onClose }: { id: string; onClose: () => void }) {
+  // 注册表游戏用加宽弹窗（棋盘/画布需要空间），原有小工具维持 470px
+  const isGame = gameById(id) != null;
   return (
     <div className="mask on">
-      <div className="modal">
+      <div className={'modal' + (isGame ? ' game-modal' : '')}>
         <button className="mclose" onClick={onClose} aria-label="关闭">
           <Mi name="close" />
         </button>
