@@ -9,6 +9,7 @@ import { IUserModule, advance } from '@/lib/learn-modules';
 
 import '@/styles/workbench.css';
 import HomeView from './HomeView';
+import GamesView from './GamesView';
 import ModuleFab from './ModuleFab';
 import ModulesView from './ModulesView';
 import PeopleView from './PeopleView';
@@ -57,6 +58,7 @@ const NAV_ITEMS: { id: ViewName; label: string; icon: string }[] = [
   { id: 'home', label: '成长地图', icon: 'map' },
   { id: 'tasks', label: '任务看板', icon: 'checkcircle' },
   { id: 'tools', label: '工具中心', icon: 'widgets' },
+  { id: 'games', label: '游戏中心', icon: 'casino' },
   { id: 'modules', label: '我的模块', icon: 'book' },
   { id: 'people', label: '团队成员', icon: 'forum' },
   { id: 'progress', label: '我的进度', icon: 'schedule' },
@@ -392,6 +394,13 @@ function WorkbenchPageInner() {
               tutorials={base.tutorials}
               onSwitchView={setView}
               onToggleMastered={toggleMastered}
+              onOpenWidget={id => setModal({ type: 'widget', id })}
+              isDark={isDark}
+            />
+
+            <GamesView
+              active={view === 'games'}
+              onSwitchView={setView}
               onOpenWidget={id => setModal({ type: 'widget', id })}
               isDark={isDark}
             />

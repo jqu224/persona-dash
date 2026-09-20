@@ -325,9 +325,9 @@ nav.side {
 }
 .view {
   display: none;
-  max-width: 820px;
+  max-width: none;
   margin: 0 auto;
-  padding: 30px 30px 60px;
+  padding: 30px 36px 60px;
 }
 .view.on {
   display: block;
@@ -2348,3 +2348,93 @@ nav.side {
 }
 .cal-pool-body { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; min-width: 0; }
 .cal-pool-body .kb-card { flex: 0 1 230px; }
+
+/* ===== 游戏中心与每日小站（2026-09-20 移植 feishu-ai 玩法） ===== */
+/* 呼吸圆圈：flex 纵向排版（标签 + 倒计时大数字），过渡时长由相位秒数驱动 */
+.breathe {
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  line-height: 1.2;
+  will-change: transform;
+}
+.breathe .bnum {
+  font-size: 20px;
+  font-weight: 900;
+}
+/* 猜单词：已猜字母命中/未命中着色 */
+.letters button.hit {
+  background: var(--green-bg);
+  color: var(--ok);
+  border-color: var(--green);
+}
+.letters button.miss {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+/* 变形球 / 提神站：等宽「终端会话」画布 */
+.ballterm {
+  font-family: Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.25;
+  white-space: pre;
+  background: var(--card);
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 10px 0;
+  color: var(--text);
+  overflow-x: auto;
+}
+/* 变形球操作行：四枚按钮单行横排 */
+.ball-ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+/* 石头剪刀布 */
+.rps-score {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+.rps-score span {
+  flex: 1;
+  text-align: center;
+  background: var(--soft);
+  border: 2px solid var(--edge-soft);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12.5px;
+  color: var(--sub);
+}
+.rps-score b {
+  display: block;
+  font-size: 22px;
+  color: var(--text);
+  margin-top: 2px;
+}
+.rps-moves {
+  display: flex;
+  gap: 10px;
+}
+.rps-moves button {
+  flex: 1;
+  border: 2px solid var(--edge);
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--text);
+  font-family: var(--font);
+  box-shadow: 3px 3px 0 var(--edge);
+}
+.rps-moves button:hover {
+  background: var(--yellow-bg);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--edge);
+}

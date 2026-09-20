@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 
 import Mi from '@/components/workbench/Mi';
-import { LINKS, ViewName, WIDGETS, dopOf } from '@/data/onboarding';
+import { LINKS, ViewName, dopOf } from '@/data/onboarding';
 import { IToolTutorial, IWorkTool } from '@/lib/base-data';
 import { UniversalLink } from '@/lib/platform';
 
@@ -174,33 +174,6 @@ export default function ToolsView({ active, learned, workTools, tutorials, onSwi
           </div>
         </div>
       ) : null}
-
-      <div className="section">
-        <div className="row-head">
-          <div>
-            <h2>每日小站</h2>
-            <p className="muted" style={{ marginTop: 3 }}>
-              培训、破冰、解压、提神，点开即用。
-            </p>
-          </div>
-        </div>
-        <div className="widgets">
-          {WIDGETS.map(w => {
-            const c = dopOf(w.ckey, isDark);
-            return (
-              <button className="widget" key={w.id} onClick={() => onOpenWidget(w.id)}>
-                <span className="wico" style={{ background: c.bg, color: c.fg }}>
-                  <Mi name={w.icon} />
-                </span>
-                <span className="wbody">
-                  <b>{w.name}</b>
-                  <span className="d">{w.d}</span>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
       <div className="section">
         <div className="row-head">

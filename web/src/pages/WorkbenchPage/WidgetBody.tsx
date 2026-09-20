@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
 
-import { FACTS, REFRESH, TOPICS, WORDS } from '@/data/onboarding';
+import { TOPICS } from '@/data/onboarding';
 import { useBaseData } from '@/lib/base-data';
+import { WORDS } from '@/data/words';
+import { getCalmExercise } from '@/data/calm';
+import { REFRESH_SHAPES } from '@/data/refresh';
+import { FACTS as COLD_FACTS } from '@/data/facts';
 
 interface WidgetBodyProps {
   id: string;
 }
 
-function pick(arr: string[]): string {
+function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/* ===== 答题闯关 ===== */
+/* ===== 答题闯关（题库来自明道云工作表） ===== */
 function QuizWidget() {
   const { quiz: QUIZ } = useBaseData();
   const [idx, setIdx] = useState(0);
@@ -167,212 +171,344 @@ function BgtaWidget() {
   );
 }
 
-/* ===== 方块呼吸 4-4-4-4 ===== */
-function BreatheWidget() {
-  const seq = [
-    { l: '吸', t: 4 },
-    { l: '屏', t: 4 },
-    { l: '呼', t: 4 },
-    { l: '屏', t: 4 },
-  ];
-  const [step, setStep] = useState(0);
-  const [running, setRunning] = useState(true);
+/* ===== 呼吸引擎：相位表 × 轮数，自动倒计时 + 圆圈平滑缩放动效 =====
+ * 动效原理：圆圈 transform 目标值随相位切换，CSS transition 时长 = 该相位秒数，
+ * 于是「吸气」在 4 秒内从收缩平滑胀大、「呼气」在 4 秒内缓缓缩回——
+ * 呼吸节奏由动效本身表达，不需要用户数秒。倒计时数字每秒跳一次，只作参考。
+ */
+interface BreathPhase {
+  label: string;
+  secs: number;
+  scale: number;
+  tip: string;
+}
+
+function useBreath(phases: BreathPhase[], rounds: number) {
+  const [s, setS] = useState({ running: false, round: 0, pi: 0, left: 0, done: false });
+
+  const start = () => setS({ running: true, round: 1, pi: 0, left: phases[0].secs, done: false });
+  const stop = () => setS(prev => ({ ...prev, running: false }));
 
   useEffect(() => {
-    if (!running) return;
-    const id = window.setInterval(() => setStep(s => s + 1), 4000);
-    return () => window.clearInterval(id);
-  }, [running]);
+    if (!s.running) return;
+    const t = window.setInterval(() => {
+      setS(prev => {
+        if (prev.left > 1) return { ...prev, left: prev.left - 1 };
+        const np = prev.pi + 1;
+        if (np < phases.length) return { ...prev, pi: np, left: phases[np].secs };
+        const nr = prev.round + 1;
+        if (nr <= rounds) return { ...prev, round: nr, pi: 0, left: phases[0].secs };
+        return { ...prev, running: false, done: true };
+      });
+    }, 1000);
+    return () => window.clearInterval(t);
+  }, [s.running, phases, rounds]);
 
-  const s = seq[step % 4];
+  return { ...s, phase: phases[s.pi] ?? phases[0], start, stop };
+}
 
+function BreathCircle({ label, desc, phases, rounds, doneText }: { label: string; desc: string; phases: BreathPhase[]; rounds: number; doneText: string }) {
+  const b = useBreath(phases, rounds);
   return (
     <div>
-      <div className="m-kicker">方块呼吸</div>
-      <h2>4-4-4-4 呼吸</h2>
-      <p className="m-desc">跟着节奏吸、屏、呼、屏，循环 4 轮大约 1 分钟。</p>
+      <div className="m-kicker">{label}</div>
+      <h2>{desc}</h2>
+      <p className="m-desc">跟着圆圈缩放呼吸，点开始后自动走完 {rounds} 轮，不用自己数秒。</p>
       <div
         className="breathe"
         style={{
-          transform: `scale(${s.l === '呼' ? 0.72 : 1})`,
-          background:
-            s.l === '呼' ? 'linear-gradient(135deg,#a7f3d0,#34d399)' : 'linear-gradient(135deg,#ffd21f,#ff7a1a)',
+          transform: `scale(${b.running ? b.phase.scale : 1})`,
+          transition: `transform ${b.running ? b.phase.secs : 0.6}s cubic-bezier(.45,.05,.55,.95)`,
         }}
       >
-        {s.l} {s.t}
+        {b.running ? (
+          <>
+            <b>{b.phase.label}</b>
+            <span className="bnum">{b.left}</span>
+          </>
+        ) : b.done ? (
+          <b>{doneText}</b>
+        ) : (
+          <b>开始</b>
+        )}
       </div>
+      {b.running ? <p className="muted" style={{ textAlign: 'center', fontSize: 12.5 }}>{b.phase.tip} · 第 {b.round} / {rounds} 轮</p> : null}
       <div className="m-actions">
-        <button className="cancel" onClick={() => setRunning(false)}>
-          停止
-        </button>
+        {b.running ? (
+          <button className="cancel" onClick={b.stop}>
+            停止
+          </button>
+        ) : (
+          <button className="ok" onClick={b.start}>
+            {b.done ? '再来一轮' : '开始'}
+          </button>
+        )}
       </div>
     </div>
+  );
+}
+
+/* ===== 方块呼吸 4-4-4-4 ===== */
+function BreatheWidget() {
+  return (
+    <BreathCircle
+      label="方块呼吸"
+      desc="4-4-4-4 呼吸"
+      rounds={4}
+      doneText="完成"
+      phases={[
+        { label: '吸气', secs: 4, scale: 1.32, tip: '鼻子慢慢吸，腹部像气球一样鼓起' },
+        { label: '屏息', secs: 4, scale: 1.32, tip: '保持住，肩膀别用力' },
+        { label: '呼气', secs: 4, scale: 0.85, tip: '嘴唇微张，缓缓吐尽' },
+        { label: '屏息', secs: 4, scale: 0.85, tip: '保持住，肩膀别用力' },
+      ]}
+    />
   );
 }
 
 /* ===== 4-7-8 助眠呼吸 ===== */
 function Four78Widget() {
-  const seq = [
-    { l: '吸气', t: 4 },
-    { l: '屏住', t: 7 },
-    { l: '呼气', t: 8 },
-  ];
+  return (
+    <BreathCircle
+      label="4-7-8 呼吸"
+      desc="助眠放松"
+      rounds={4}
+      doneText="放松"
+      phases={[
+        { label: '吸气', secs: 4, scale: 1.3, tip: '舌尖轻抵上颚，鼻子慢慢吸' },
+        { label: '屏息', secs: 7, scale: 1.3, tip: '保持住，感受腹部的压力' },
+        { label: '呼气', secs: 8, scale: 0.82, tip: '噘嘴发出轻轻的「呼」声，吐尽' },
+      ]}
+    />
+  );
+}
+
+/* ===== 握拳放松（绷紧-松开交替，自动倒计时） ===== */
+function MuscleWidget() {
+  return (
+    <BreathCircle
+      label="握拳放松"
+      desc="绷紧 5 秒 · 松开 10 秒"
+      rounds={1}
+      doneText="完成"
+      phases={[
+        { label: '握紧双拳', secs: 5, scale: 1.24, tip: '用七成力，保持住' },
+        { label: '松开', secs: 10, scale: 1, tip: '摊在腿上，感受血液回流的温热' },
+        { label: '耸肩', secs: 5, scale: 1.24, tip: '耸到耳朵，再用力一点' },
+        { label: '放下', secs: 10, scale: 1, tip: '让肩膀彻底垮掉' },
+        { label: '皱紧面部', secs: 5, scale: 1.24, tip: '眯眼、咬牙、皱眉' },
+        { label: '舒展', secs: 10, scale: 1, tip: '打个大哈欠也可以' },
+      ]}
+    />
+  );
+}
+
+/* ===== 通用引导语步进器（正念数息 / 身体扫描） ===== */
+function GuideWidget({ id, name }: { id: string; name: string }) {
+  const ex = getCalmExercise(id);
   const [step, setStep] = useState(0);
-  const [running, setRunning] = useState(true);
-
-  useEffect(() => {
-    if (!running) return;
-    const id = window.setInterval(() => setStep(s => s + 1), 8000);
-    return () => window.clearInterval(id);
-  }, [running]);
-
-  const s = seq[step % 3];
+  if (!ex) return null;
+  const total = ex.steps.length;
+  const done = step >= total;
+  const cur = ex.steps[Math.min(step, total - 1)];
+  const md = typeof cur.md === 'string' ? cur.md : '';
 
   return (
     <div>
-      <div className="m-kicker">4-7-8 呼吸</div>
-      <h2>助眠放松</h2>
-      <p className="m-desc">吸 4 秒 → 屏 7 秒 → 呼 8 秒，循环几轮后会明显放松。</p>
-      <div className="breathe" style={{ transform: `scale(${s.l === '呼气' ? 0.72 : 1})` }}>
-        {s.l} {s.t}
+      <div className="m-kicker">{name}</div>
+      <h2>{ex.name}</h2>
+      <p className="m-desc">{ex.caption}</p>
+      <div className="panel">{done ? ex.done : md}</div>
+      <div style={{ textAlign: 'center', marginTop: 12 }}>
+        {Array.from({ length: total }, (_, i) => (
+          <span key={i} className={'step-dot' + (i === step ? ' on' : '')} />
+        ))}
       </div>
       <div className="m-actions">
-        <button className="cancel" onClick={() => setRunning(false)}>
-          停止
-        </button>
+        {!done ? (
+          <>
+            <button className="ok" onClick={() => setStep(s => s + 1)}>
+              {typeof cur.btn === 'string' ? cur.btn : '下一步'}
+            </button>
+            <button className="cancel" onClick={() => setStep(total)}>
+              停止
+            </button>
+          </>
+        ) : (
+          <button className="ok" onClick={() => setStep(0)}>
+            再做一次
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-/* ===== 54321 着陆 ===== */
+/* ===== 54321 着陆（15 步逐样点名，完整版） ===== */
 function FiveWidget() {
-  const list = [
-    '看：说出你看到的 5 样东西',
-    '触：感受 4 种身体的触觉',
-    '听：留意 3 种周围的声音',
-    '闻：觉察 2 种气味',
-    '尝：体会 1 种味道或感受',
-  ];
+  const ex = getCalmExercise('ground');
   const [step, setStep] = useState(0);
-  const done = step >= list.length;
+  if (!ex) return null;
+  const total = ex.steps.length;
+  const done = step >= total;
+  const cur = ex.steps[Math.min(step, total - 1)];
+  const md = typeof cur.md === 'string' ? cur.md : '';
 
   return (
     <div>
       <div className="m-kicker">54321 着陆</div>
       <h2>把注意力拉回当下</h2>
       <p className="m-desc">按你的节奏一步步走，不用赶。</p>
-      <div className="panel">
-        {done ? '完成啦。你现在的感觉怎么样？可以回到任务列表，挑一件小事开始。' : list[step]}
-      </div>
+      <div className="panel">{done ? ex.done : md}</div>
       <div style={{ textAlign: 'center', marginTop: 12 }}>
         {!done
-          ? list.map((_, i) => <span key={i} className={'step-dot' + (i === step ? ' on' : '')} />)
+          ? Array.from({ length: total - 1 }, (_, i) => (
+              <span key={i} className={'step-dot' + (i + 1 === step ? ' on' : '')} />
+            ))
           : null}
       </div>
       <div className="m-actions">
         {!done ? (
           <>
             <button className="ok" onClick={() => setStep(s => s + 1)}>
-              下一步
+              {typeof cur.btn === 'string' ? cur.btn : '下一步'}
             </button>
-            <button className="cancel" onClick={() => setStep(list.length)}>
+            <button className="cancel" onClick={() => setStep(total)}>
               停止
             </button>
           </>
-        ) : null}
+        ) : (
+          <button className="ok" onClick={() => setStep(0)}>
+            再做一次
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-/* ===== 猜词小游戏 ===== */
+/* ===== 猜单词（CET 英文词库，26 字母键盘，6 次机会） ===== */
+const MAX_WRONG = 6;
+
+/** 吊死鬼渐进绘制：每错一次多画一笔（SPIRIT.md 标准图案） */
+function gallowsOf(wrongs: number): string {
+  const rows = ['  +---+', '  |   |'];
+  rows.push('  ' + (wrongs >= 1 ? 'O' : ' ') + '   |');
+  rows.push('  |  ' + (wrongs >= 2 ? '/' : ' ') + (wrongs >= 3 ? '|' : ' ') + (wrongs >= 4 ? '\\' : ' '));
+  rows.push('  |  ' + (wrongs >= 5 ? '/' : ' ') + ' ' + (wrongs >= 6 ? '\\' : ' '));
+  rows.push('      |');
+  rows.push('=========');
+  return rows.join('\n');
+}
+
 function HangmanWidget() {
-  const [word, setWord] = useState(() => pick(WORDS).toUpperCase());
-  const [left, setLeft] = useState(6);
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * WORDS.length));
   const [guessed, setGuessed] = useState<string[]>([]);
-  const [right, setRight] = useState<Set<string>>(new Set());
 
-  const wordLetters = new Set(word.split(''));
-  const won = right.size === wordLetters.size;
-  const lost = left <= 0;
-  const parts = 6 - left;
-  const gallows = [
-    '  ____',
-    '  |  |',
-    '  |  ' + (parts > 0 ? 'o' : ''),
-    '  |  ' + (parts > 1 ? '/' : ' ') + (parts > 2 ? '|' : ' ') + (parts > 3 ? '\\' : ' '),
-    '  |  ' + (parts > 4 ? '/' : ' ') + ' ' + (parts > 5 ? '\\' : ' '),
-    '__|__',
-  ].join('\n');
-  const shown = word
-    .split('')
-    .map(c => (right.has(c) ? c : '_'))
-    .join(' ');
+  const entry = WORDS[idx];
+  const word = entry.w.toUpperCase();
+  const letters = new Set(word.split(''));
+  const wrongs = guessed.filter(l => !letters.has(l)).length;
+  const hits = [...letters].filter(l => guessed.includes(l)).length;
+  const won = hits === letters.size;
+  const lost = !won && wrongs >= MAX_WRONG;
+  const totalGuesses = hits + wrongs;
 
-  const guess = (c: string) => {
-    if (guessed.includes(c) || won || lost) return;
-    setGuessed(g => [...g, c]);
-    if (word.includes(c)) {
-      setRight(prev => {
-        const n = new Set(prev);
-        n.add(c);
-        return n;
-      });
-    } else {
-      setLeft(l => l - 1);
-    }
+  const guess = (l: string) => {
+    if (guessed.includes(l) || won || lost) return;
+    setGuessed(g => [...g, l]);
   };
 
   const reset = () => {
-    setWord(pick(WORDS).toUpperCase());
-    setLeft(6);
+    setIdx(Math.floor(Math.random() * WORDS.length));
     setGuessed([]);
-    setRight(new Set());
   };
 
-  const msg = won
-    ? `猜对啦！这个词是「${word}」。`
-    : lost
-      ? `机会用完啦，正确答案是「${word}」。`
-      : `还剩 ${left} 次机会`;
+  const shown = word
+    .split('')
+    .map(c => (guessed.includes(c) ? c : '_'))
+    .join(' ');
 
   return (
     <div>
-      <div className="m-kicker">猜词小游戏</div>
-      <h2>从术语表里猜一个词</h2>
-      <pre className="hang">{gallows}</pre>
-      <div className="word">{shown}</div>
+      <div className="m-kicker">猜单词</div>
+      <h2>从词库猜一个英文词</h2>
+      <p className="m-desc">提示：{entry.h}（CET 词汇 · {word.length} 个字母）</p>
+      <pre className="hang">{won ? '' : gallowsOf(wrongs)}</pre>
+      <div className="word">{won || lost ? word : shown}</div>
       <div className="letters">
         {won || lost
           ? null
-          : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => (
-              <button key={c} disabled={guessed.includes(c)} onClick={() => guess(c)}>
-                {c}
-              </button>
-            ))}
+          : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(c => {
+              const g = guessed.includes(c);
+              const cls = g ? (letters.has(c) ? ' hit' : ' miss') : '';
+              return (
+                <button key={c} className={cls} disabled={g} onClick={() => guess(c)}>
+                  {c}
+                </button>
+              );
+            })}
       </div>
-      <p className="m-desc">{msg}</p>
+      {won ? (
+        <p className="m-desc" style={{ color: 'var(--ok)' }}>
+          漂亮！答对 {hits} 次 · 答错 {wrongs} 次 · 正确率 {totalGuesses ? Math.round((hits / totalGuesses) * 100) : 100}%
+        </p>
+      ) : lost ? (
+        <p className="m-desc" style={{ color: 'var(--danger)' }}>
+          机会用完啦，答案是 <b>{word}</b>（{entry.h}）。下次紫腚行！
+        </p>
+      ) : (
+        <p className="m-desc">还剩 {MAX_WRONG - wrongs} 次机会</p>
+      )}
       <div className="m-actions">
         <button className="cancel" onClick={reset}>
-          换一个词
+          {won || lost ? '再来一局' : '换一个词'}
         </button>
       </div>
     </div>
   );
 }
 
-/* ===== 提神站 ===== */
+/* ===== 提神站（100 张 emoji 像素画，移植自变形球同宗画风） ===== */
 function EnergyWidget() {
-  const [tip, setTip] = useState(() => pick(REFRESH));
+  const [idx, setIdx] = useState(() => Math.floor(Math.random() * REFRESH_SHAPES.length));
+  const shape = REFRESH_SHAPES[idx];
+  const again = () =>
+    setIdx(i => {
+      if (REFRESH_SHAPES.length < 2) return i;
+      let n = i;
+      while (n === i) n = Math.floor(Math.random() * REFRESH_SHAPES.length);
+      return n;
+    });
   return (
     <div>
       <div className="m-kicker">提神站</div>
-      <h2>2 分钟小动作</h2>
-      <div className="panel">{tip}</div>
+      <h2>{shape.name}</h2>
+      <pre className="ballterm">{shape.lines.join('\n')}</pre>
+      <p className="muted" style={{ textAlign: 'center', fontSize: 12.5 }}>
+        {shape.caption} · 第 {idx + 1} 号图形
+      </p>
       <div className="m-actions">
-        <button className="ok" onClick={() => setTip(pick(REFRESH))}>
-          再来一个
+        <button className="ok" onClick={again}>
+          再换一个
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ===== 冷知识 ===== */
+function FactWidget() {
+  const [fact, setFact] = useState(() => pick(COLD_FACTS));
+  return (
+    <div>
+      <div className="m-kicker">冷知识</div>
+      <h2>你知道吗</h2>
+      <div className="panel">{fact}</div>
+      <p className="m-desc">第 {COLD_FACTS.indexOf(fact) + 1} 条 / 共 {COLD_FACTS.length} 条。</p>
+      <div className="m-actions">
+        <button className="ok" onClick={() => setFact(pick(COLD_FACTS))}>
+          换一条
         </button>
       </div>
     </div>
@@ -398,6 +534,14 @@ export default function WidgetBody({ id }: WidgetBodyProps) {
       return <HangmanWidget />;
     case 'energy':
       return <EnergyWidget />;
+    case 'mindful':
+      return <GuideWidget id="mindful" name="正念数息" />;
+    case 'scan':
+      return <GuideWidget id="scan" name="身体扫描" />;
+    case 'muscle':
+      return <MuscleWidget />;
+    case 'fact':
+      return <FactWidget />;
     default:
       return (
         <div>

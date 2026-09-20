@@ -240,10 +240,14 @@ export const WIDGETS: IWidget[] = [
   { id: 'break', name: '破冰话题', d: '随机一个话题，认识工友也能用', icon: 'casino', ckey: 'orange' },
   { id: 'bgta', name: 'BGTA 提问生成', d: '把问题组织成四段式，一次问清楚', icon: 'forum', ckey: 'green' },
   { id: 'breathe', name: '方块呼吸', d: '4-4-4-4 呼吸引导，60 秒平静下来', icon: 'air', ckey: 'cyan' },
-  { id: 'five', name: '54321 着陆', d: '用五种感官把注意力拉回当下', icon: 'touch', ckey: 'pink' },
   { id: '478', name: '4-7-8 助眠呼吸', d: '吸 4 秒 · 屏 7 秒 · 呼 8 秒', icon: 'snow', ckey: 'teal' },
-  { id: 'hangman', name: '猜词小游戏', d: '从术语表里猜词，赢过小笼', icon: 'abc', ckey: 'lime' },
-  { id: 'energy', name: '提神站', d: '喝口水、抬抬头，2 分钟小动作', icon: 'bolt', ckey: 'amber' },
+  { id: 'muscle', name: '握拳放松', d: '绷紧 5 秒松开 10 秒，自动倒计时', icon: 'hand', ckey: 'amber' },
+  { id: 'five', name: '54321 着陆', d: '用五种感官把注意力拉回当下', icon: 'touch', ckey: 'pink' },
+  { id: 'mindful', name: '正念数息', d: '观呼吸数到 8，走神就轻轻拉回', icon: 'target', ckey: 'turquoise' },
+  { id: 'scan', name: '身体扫描', d: '从脚到脸，一个部位一个部位松下来', icon: 'home', ckey: 'green' },
+  { id: 'hangman', name: '猜单词', d: 'CET 英文词库，26 键字母键盘', icon: 'abc', ckey: 'lime' },
+  { id: 'energy', name: '提神站', d: '100 张 emoji 像素画，换一张醒一醒', icon: 'bolt', ckey: 'orange' },
+  { id: 'fact', name: '冷知识', d: '抽一条冷知识，涨点奇怪的知识', icon: 'book', ckey: 'blue' },
 ];
 
 /* ===== 答题闯关题库 ===== */
@@ -287,7 +291,7 @@ export const WORDS: string[] = ['BGTA', 'MR', '灰度', '复盘', 'OKR', '冒烟
 
 /* ===== UI 状态类型 ===== */
 export type TaskFilter = 'today' | 'todo' | 'done';
-export type ViewName = 'home' | 'people' | 'tools' | 'tasks' | 'modules' | 'progress' | 'settings';
+export type ViewName = 'home' | 'people' | 'tools' | 'games' | 'tasks' | 'modules' | 'progress' | 'settings';
 export type ModalState =
   | { type: 'task'; taskId: string }
   | { type: 'add' }
