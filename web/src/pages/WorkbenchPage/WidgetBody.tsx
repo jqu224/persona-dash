@@ -31,7 +31,7 @@ function QuizWidget() {
       <div>
         <div className="m-kicker">答题闯关</div>
         <h2>题库加载中</h2>
-        <p className="m-desc">题库正在从飞书后台同步，稍后再试。</p>
+        <p className="m-desc">题库正在从明道云后台同步，稍后再试。</p>
       </div>
     );
   }

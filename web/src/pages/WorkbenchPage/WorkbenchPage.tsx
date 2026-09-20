@@ -137,7 +137,7 @@ function WorkbenchPageInner() {
   useEffect(() => {
     if (base.sync === 'live' && !notifiedSync.current) {
       notifiedSync.current = true;
-      notify('已从飞书后台同步最新数据');
+      notify('已从明道云后台同步最新数据');
     }
   }, [base.sync, notify]);
 
@@ -238,7 +238,7 @@ function WorkbenchPageInner() {
     [base.roles, notify],
   );
 
-  /* 任务看板：状态切换（乐观更新 + 写回飞书多维表格） */
+  /* 任务看板：状态切换（乐观更新 + 写回明道云工作表） */
   const handleBoardStatus = useCallback(
     (id: string, status: string, synced: boolean) => {
       setStatusOverrides(prev => ({ ...prev, [id]: status }));
@@ -247,16 +247,16 @@ function WorkbenchPageInner() {
       } else {
         setDoneIds(prev => prev.filter(x => x !== id));
       }
-      if (synced) notify(`状态已写回飞书：${status}`);
-      else notify('本地已更新，但写回飞书失败，稍后可重试');
+      if (synced) notify(`状态已写回明道云：${status}`);
+      else notify('本地已更新，但写回明道云失败，稍后可重试');
     },
     [notify],
   );
 
-  /* 「+」号新建任务：已写入飞书多维表格，刷新直连数据并跳到看板 */
+  /* 「+」号新建任务：已写入明道云工作表，刷新直连数据并跳到看板 */
   const handleTaskCreated = useCallback(
     (title: string, _category: string) => {
-      notify(`「${title}」已写入飞书多维表格`);
+      notify(`「${title}」已写入明道云工作表`);
       setView('tasks');
       base.refresh();
     },
@@ -354,7 +354,7 @@ function WorkbenchPageInner() {
             <div className="side-foot">
               Onboarding · 每日成长工作台
               <br />
-              {base.sync === 'live' ? '内容后台：飞书多维表格' : '当前为本地演示数据'}
+              {base.sync === 'live' ? '内容后台：明道云 HAP' : '当前为本地演示数据'}
             </div>
           </nav>
 

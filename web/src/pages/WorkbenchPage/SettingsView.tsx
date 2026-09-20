@@ -22,9 +22,9 @@ interface SettingsViewProps {
 }
 
 const SYNC_TEXT: Record<BaseSyncState, { label: string; desc: string }> = {
-  live: { label: '已连接', desc: '内容实时来自飞书多维表格「新人助手 Onboarding Helper」，任务状态可写回 Base。' },
-  local: { label: '本地演示', desc: '正在连接飞书多维表格，当前展示本地演示数据。' },
-  error: { label: '连接失败', desc: '飞书后台暂不可达，已回退本地演示数据，稍后自动重试。' },
+  live: { label: '已连接', desc: '内容实时来自明道云工作表「新人助手 Onboarding Helper」，任务状态可写回明道云。' },
+  local: { label: '本地演示', desc: '正在连接明道云工作表，当前展示本地演示数据。' },
+  error: { label: '连接失败', desc: '明道云后台暂不可达，已回退本地演示数据，稍后自动重试。' },
 };
 
 export default function SettingsView({ active, role, roles, onChooseRole, prefs, onTogglePref, sync, xp, level, onSwitchView }: SettingsViewProps) {
@@ -55,7 +55,7 @@ export default function SettingsView({ active, role, roles, onChooseRole, prefs,
           <div>
             <h2>当前工种</h2>
             <p className="muted" style={{ marginTop: 3 }}>
-              来自飞书多维表格「工种角色」表，切换后任务地图与推荐会更新。
+              来自明道云工作表「工种角色」表，切换后任务地图与推荐会更新。
             </p>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default function SettingsView({ active, role, roles, onChooseRole, prefs,
           <div>
             <h2>数据同步</h2>
             <p className="muted" style={{ marginTop: 3 }}>
-              新人助手与飞书多维表格双向联动。
+              新人助手与明道云工作表双向联动。
             </p>
           </div>
           <span className={'gstatus ' + (sync === 'live' ? 'mastered' : 'learning')}>{s.label}</span>

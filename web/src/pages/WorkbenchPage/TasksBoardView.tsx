@@ -19,9 +19,9 @@ import BoardKanban from './BoardKanban';
 interface TasksBoardViewProps {
   active: boolean;
   boardTasks: IBoardTask[];
-  /** 本地状态覆盖（record id → 任务状态），写回飞书后乐观更新 */
+  /** 本地状态覆盖（record id → 任务状态），写回明道云后乐观更新 */
   overrides: Record<string, string>;
-  /** 写回飞书后的回调（成功/失败提示由页面层统一处理） */
+  /** 写回明道云后的回调（成功/失败提示由页面层统一处理） */
   onStatusChange: (id: string, status: string, synced: boolean) => void;
   /** 轻提示（子任务写回成功/失败） */
   notify: (msg: string) => void;
@@ -62,7 +62,7 @@ function readPlan(): Record<string, string> {
 export default function TasksBoardView({ active, boardTasks, overrides, onStatusChange, notify, onSwitchView }: TasksBoardViewProps) {
   const [roleFilter, setRoleFilter] = useState('all');
   const [pending, setPending] = useState<string | null>(null);
-  /** 描述覆盖（record id → 最新描述，勾选子任务后乐观更新并写回飞书） */
+  /** 描述覆盖（record id → 最新描述，勾选子任务后乐观更新并写回明道云） */
   const [descOverrides, setDescOverrides] = useState<Record<string, string>>({});
   /** 看板 / 日历视图切换，默认看板 */
   const [boardMode, setBoardMode] = useState<'kanban' | 'calendar'>('kanban');
@@ -143,17 +143,17 @@ export default function TasksBoardView({ active, boardTasks, overrides, onStatus
     });
   }, [roleTasks]);
 
-  /* 勾选子任务：乐观更新描述 + 写回飞书 */
+  /* 勾选子任务：乐观更新描述 + 写回明道云 */
   const toggleSub = (t: IBoardTask, i: number) => {
     const base = descOverrides[t.id] ?? t.desc;
     const next = toggleSubtaskLine(base, i);
     setDescOverrides(prev => ({ ...prev, [t.id]: next }));
     updateTaskDescription(t.id, next).then(ok =>
-      notify(ok ? '子任务进度已写回飞书' : '子任务写回失败，稍后重试'),
+      notify(ok ? '子任务进度已写回明道云' : '子任务写回失败，稍后重试'),
     );
   };
 
-  /* 统一的状态变更入口：乐观更新 + 写回飞书 */
+  /* 统一的状态变更入口：乐观更新 + 写回明道云 */
   const applyStatus = (id: string, next: string) => {
     setPending(id);
     updateTaskStatus(id, next)
@@ -177,7 +177,7 @@ export default function TasksBoardView({ active, boardTasks, overrides, onStatus
         <div className="eyebrow">Task Board</div>
         <h1 style={{ marginTop: 5 }}>任务看板</h1>
         <p className="muted" style={{ marginTop: 7 }}>
-          全部入职任务来自飞书多维表格「入职任务」表；看板拖拽或点击状态，都会写回 Base。
+          全部入职任务来自明道云工作表「入职任务」表；看板拖拽或点击状态，都会写回明道云。
         </p>
       </div>
 
@@ -212,7 +212,7 @@ export default function TasksBoardView({ active, boardTasks, overrides, onStatus
             <h2>{boardMode === 'kanban' ? '看板视图' : '日历视图'}</h2>
             <p className="muted" style={{ marginTop: 3 }}>
               {boardMode === 'kanban'
-                ? '按状态分三列，拖拽卡片到目标列松手，即可切换状态并写回飞书。'
+                ? '按状态分三列，拖拽卡片到目标列松手，即可切换状态并写回明道云。'
                 : '支持 3 天 / 7 天 / 月视图排期，拖动卡片到目标日期即可安排。'}
             </p>
           </div>
@@ -302,7 +302,7 @@ export default function TasksBoardView({ active, boardTasks, overrides, onStatus
                     <article className={'bcard' + (locked ? ' locked' : '')} key={t.id}>
                       <div className="bcard-main">
                         <b>{t.title}</b>
-                        <p className="muted">{mainDesc || '任务描述待补充，可到飞书后台完善。'}</p>
+                        <p className="muted">{mainDesc || '任务描述待补充，可到明道云后台完善。'}</p>
                         {subs.length > 0 ? (
                           <ul className="bcheck">
                             {subs.map((sub, i) => (
@@ -310,7 +310,7 @@ export default function TasksBoardView({ active, boardTasks, overrides, onStatus
                                 key={sub.title + i}
                                 className={sub.done ? 'on' : ''}
                                 onClick={() => toggleSub(t, i)}
-                                title="点击切换勾选，进度会写回飞书"
+                                title="点击切换勾选，进度会写回明道云"
                               >
                                 <span className="bcheck-box">{sub.done ? '☑' : '□'}</span>
                                 {sub.title}

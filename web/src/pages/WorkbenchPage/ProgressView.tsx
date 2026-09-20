@@ -54,7 +54,7 @@ export default function ProgressView({ active, role, tracks, boardTasks, overrid
         <div className="eyebrow">My Progress</div>
         <h1 style={{ marginTop: 5 }}>我的进度</h1>
         <p className="muted" style={{ marginTop: 7 }}>
-          等级与经验值来自任务完成、工具掌握与测验学习，数据与飞书多维表格联动。
+          等级与经验值来自任务完成、工具掌握与测验学习，数据与明道云工作表联动。
         </p>
       </div>
 

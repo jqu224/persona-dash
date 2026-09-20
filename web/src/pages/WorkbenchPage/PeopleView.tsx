@@ -44,7 +44,7 @@ export default function PeopleView({ active, members, onSwitchView, onOpenMessag
         <div className="eyebrow">Team Members</div>
         <h1 style={{ marginTop: 5 }}>团队成员</h1>
         <p className="muted" style={{ marginTop: 7 }}>
-          认识你的小伙伴，快速建立连接。数据来自飞书多维表格「团队成员」表。
+          认识你的小伙伴，快速建立连接。数据来自明道云工作表「团队成员」表。
         </p>
       </div>
 
@@ -53,7 +53,7 @@ export default function PeopleView({ active, members, onSwitchView, onOpenMessag
           <div>
             <h2>我的伙伴</h2>
             <p className="muted" style={{ marginTop: 3 }}>
-              数据来自飞书多维表格「团队成员」表，向导师与协作方提问。
+              数据来自明道云工作表「团队成员」表，向导师与协作方提问。
             </p>
           </div>
           <span className="online">{shown.length} 位成员</span>

@@ -44,7 +44,7 @@ export default function ToolsView({ active, learned, workTools, tutorials, onSwi
         <div className="eyebrow">Tool Center</div>
         <h1 style={{ marginTop: 5 }}>工具中心</h1>
         <p className="muted" style={{ marginTop: 7 }}>
-          掌握工作中常用的工具与平台，提升工作效率。数据来自飞书多维表格「工作工具」表。
+          掌握工作中常用的工具与平台，提升工作效率。数据来自明道云工作表「工作工具」表。
         </p>
       </div>
 
@@ -103,7 +103,7 @@ export default function ToolsView({ active, learned, workTools, tutorials, onSwi
                   <div className="toolcard-body">
                     <div className="step">
                       <span className="sno">i</span>
-                      <span>{t.guide || '使用指南待补充，可到飞书后台完善。'}</span>
+                      <span>{t.guide || '使用指南待补充，可到明道云后台完善。'}</span>
                     </div>
                     <button className={'gbtn' + (mastered ? ' primary' : '')} onClick={() => onToggleMastered(t.name)}>
                       {mastered ? <Mi name="checkcircle" /> : null}
@@ -126,7 +126,7 @@ export default function ToolsView({ active, learned, workTools, tutorials, onSwi
             <div>
               <h2>工具教程</h2>
               <p className="muted" style={{ marginTop: 3 }}>
-                数据来自飞书多维表格「工具教程」表，点开查看学习内容。
+                数据来自明道云工作表「工具教程」表，点开查看学习内容。
               </p>
             </div>
             <span className="online">{tutorials.length} 篇</span>
@@ -165,7 +165,7 @@ export default function ToolsView({ active, learned, workTools, tutorials, onSwi
                   <div className={'guide-body' + (open ? ' open' : '')}>
                     <div className="step">
                       <span className="sno">i</span>
-                      <span>{tu.content || '教程内容待补充，请到飞书后台完善。'}</span>
+                      <span>{tu.content || '教程内容待补充，请到明道云后台完善。'}</span>
                     </div>
                   </div>
                 </div>

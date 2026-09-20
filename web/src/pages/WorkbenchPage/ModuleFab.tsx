@@ -27,7 +27,7 @@ interface ModuleFabProps {
   onOpen: () => void;
   onClose: () => void;
   onCreated: (m: IUserModule, byAI: boolean) => void;
-  /** 任务创建成功回调（任务已写入飞书多维表格） */
+  /** 任务创建成功回调（任务已写入明道云工作表） */
   onTaskCreated: (title: string, category: string) => void;
   /** 现有任务标题列表（用于分类自动编号） */
   existingTitles: string[];
@@ -150,7 +150,7 @@ export default function ModuleFab({ open, onOpen, onClose, onCreated, onTaskCrea
     const ok = await createBitableTask({ title, desc: descText, category: finalCategory });
     setSubmitting(false);
     if (!ok) {
-      setError('写入飞书多维表格失败，请重试');
+      setError('写入明道云工作表失败，请重试');
       return;
     }
     onTaskCreated(title, finalCategory);
@@ -199,7 +199,7 @@ export default function ModuleFab({ open, onOpen, onClose, onCreated, onTaskCrea
 
             <div className="fab-tabs">
               <button className={'fab-tab' + (tab === 'task' ? ' on' : '')} onClick={() => setTab('task')}>
-                轻量任务 · 写入飞书表格
+                轻量任务 · 写入明道云表格
               </button>
               <button className={'fab-tab' + (tab === 'module' ? ' on' : '')} onClick={() => setTab('module')}>
                 学习模块
@@ -229,7 +229,7 @@ export default function ModuleFab({ open, onOpen, onClose, onCreated, onTaskCrea
                     />
                     {error ? <p className="fab-error">{error}</p> : null}
                     <div className="fab-actions">
-                      <span className="muted" style={{ fontSize: 12 }}>轻量版任务，记录在飞书多维表格</span>
+                      <span className="muted" style={{ fontSize: 12 }}>轻量版任务，记录在明道云工作表</span>
                       <button className="fab-submit" onClick={toStep2}>下一步</button>
                     </div>
                   </>
@@ -375,7 +375,7 @@ export default function ModuleFab({ open, onOpen, onClose, onCreated, onTaskCrea
                     <div className="fab-actions">
                       <button className="fab-ghost" onClick={() => setStep(2)} disabled={submitting}>上一步</button>
                       <button className="fab-submit" onClick={submitTask} disabled={submitting}>
-                        {submitting ? '写入飞书…' : '创建任务'}
+                        {submitting ? '写入明道云…' : '创建任务'}
                       </button>
                     </div>
                   </>

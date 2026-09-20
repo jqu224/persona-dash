@@ -25,7 +25,7 @@ import {
 } from '@/data/onboarding';
 import { isUserTaskTitle } from '@/lib/task-create';
 
-/* ===== 飞书多维表格「新人助手 Onboarding Helper」插件实例（一表一实例，仅读） ===== */
+/* ===== 明道云工作表「新人助手 Onboarding Helper」插件实例（一表一实例，仅读） ===== */
 export const PLUGIN_IDS = {
   roles: 'feishu_bitable_onboarding_role_read_1',
   tasks: 'feishu_bitable_onboarding_task_read_1',
@@ -99,7 +99,7 @@ export interface BaseDataState {
   workTools: IWorkTool[];
   boardTasks: IBoardTask[];
   sync: BaseSyncState;
-  /** 重新从飞书多维表格拉取全量数据（新建任务后调用） */
+  /** 重新从明道云工作表拉取全量数据（新建任务后调用） */
   refresh: () => Promise<void>;
 }
 
@@ -456,7 +456,7 @@ function toBoardTasks(rows: TaskRow[]): IBoardTask[] {
   }));
 }
 
-/* ===== 任务状态写回飞书多维表格（入职任务表） ===== */
+/* ===== 任务状态写回明道云工作表（入职任务表） ===== */
 const TASK_STATUS_VALUES = ['未开始', '进行中', '已完成'] as const;
 
 export function isTaskStatus(v: string): boolean {
@@ -468,15 +468,15 @@ export async function updateTaskStatus(recordId: string, status: string): Promis
     await capabilityClient.load(PLUGIN_IDS.taskWrite).call('batchUpdateRecords', {
       records: [{ id: recordId, record: { 任务状态: status } }],
     });
-    logger.info('任务状态已写回飞书:', recordId, status);
+    logger.info('任务状态已写回明道云:', recordId, status);
     return true;
   } catch (error) {
-    logger.error('任务状态写回飞书失败:', String(error));
+    logger.error('任务状态写回明道云失败:', String(error));
     return false;
   }
 }
 
-/* ===== 直连飞书：每次挂载全量拉取（不再使用本地缓存） ===== */
+/* ===== 直连明道云：每次挂载全量拉取（不再使用本地缓存） ===== */
 
 const BaseDataContext = createContext<BaseDataState>(LOCAL_STATE);
 
@@ -505,7 +505,7 @@ async function loadAll(): Promise<Partial<BaseDataState>> {
     r => r.status === 'fulfilled',
   );
   if (!anyOk) {
-    logger.warn('飞书后台同步失败，继续使用本地演示数据');
+    logger.warn('明道云后台同步失败，继续使用本地演示数据');
     return { sync: 'error' };
   }
 

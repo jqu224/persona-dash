@@ -98,7 +98,7 @@ export function stripSubtasks(desc: string): string {
   return (idx < 0 ? desc : desc.slice(0, idx)).trim();
 }
 
-/** 勾选/取消第 i 条子任务，返回新的完整描述（用于写回飞书） */
+/** 勾选/取消第 i 条子任务，返回新的完整描述（用于写回明道云） */
 export function toggleSubtaskLine(desc: string, target: number): string {
   const idx = desc.indexOf(SUBTASK_MARK);
   if (idx < 0) return desc;
@@ -161,7 +161,7 @@ export async function streamImageDescription(
   return full;
 }
 
-/* ===== 飞书多维表格：新增任务记录 / 更新描述 ===== */
+/* ===== 明道云工作表：新增任务记录 / 更新描述 ===== */
 
 export interface ITaskRecordInput {
   title: string;
@@ -207,13 +207,13 @@ export async function createBitableTask(input: ITaskRecordInput): Promise<boolea
       await capabilityClient.load(PLUGIN.bitable).call('batchAddRecords', minimal);
       return true;
     } catch (e2) {
-      logger.error('任务写入飞书多维表格失败:', String(e2));
+      logger.error('任务写入明道云工作表失败:', String(e2));
       return false;
     }
   }
 }
 
-/** 勾选子任务后，把更新后的整段描述写回飞书 */
+/** 勾选子任务后，把更新后的整段描述写回明道云 */
 export async function updateTaskDescription(recordId: string, desc: string): Promise<boolean> {
   try {
     await capabilityClient
@@ -221,7 +221,7 @@ export async function updateTaskDescription(recordId: string, desc: string): Pro
       .call('batchUpdateRecords', { records: [{ id: recordId, record: { 任务描述: desc } }] });
     return true;
   } catch (error) {
-    logger.error('子任务勾选写回飞书失败:', String(error));
+    logger.error('子任务勾选写回明道云失败:', String(error));
     return false;
   }
 }
