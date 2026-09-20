@@ -2934,3 +2934,28 @@ nav.side {
 .tchar.cur {
   border-bottom: 2.5px solid var(--edge);
 }
+
+/* ===== 游戏内变体选项条（难度/棋盘/主题切换） ===== */
+.vbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 4px 0 10px;
+}
+.vbar .vb {
+  border: 2px solid var(--edge-soft);
+  border-radius: 99px;
+  background: var(--card);
+  color: var(--sub);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-family: var(--font);
+}
+.vbar .vb.on {
+  border-color: var(--edge);
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  box-shadow: 2px 2px 0 var(--edge);
+}

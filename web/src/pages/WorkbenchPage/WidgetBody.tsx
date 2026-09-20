@@ -8,6 +8,7 @@ import { getCalmExercise } from '@/data/calm';
 import { REFRESH_SHAPES } from '@/data/refresh';
 import { FACTS as COLD_FACTS } from '@/data/facts';
 import { gameById } from '@/data/games';
+import type { GameEntry } from '@/data/games';
 import { TESTS } from '@/data/tests';
 import { transformBall, ZOOM_LABEL, ZOOM_METER } from '@/data/ball';
 import { useMemo } from 'react';
@@ -555,6 +556,29 @@ function FactWidget() {
 }
 
 /* ===== 分发器 ===== */
+/* ===== 引擎宿主：同游戏的难度/主题/棋盘变体 → 游戏内选项条 =====
+ * 变体切换即重开一局（key 重挂载），最佳成绩按 gameId:variantId 分别记录。 */
+function EngineHost({ game, engine: Engine }: { game: GameEntry; engine: ComponentType<EngineProps> }) {
+  const variants = game.variants ?? [];
+  const [vIdx, setVIdx] = useState(0);
+  const v = variants[vIdx];
+  const scoreId = v ? `${game.id}:${v.id}` : game.id;
+  return (
+    <div>
+      {variants.length > 1 ? (
+        <div className="vbar" role="group" aria-label="玩法选项">
+          {variants.map((opt, i) => (
+            <button key={opt.id} className={'vb' + (i === vIdx ? ' on' : '')} onClick={() => setVIdx(i)}>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <Engine key={scoreId} id={scoreId} params={v?.params ?? game.params ?? {}} />
+    </div>
+  );
+}
+
 /* ===== 人格测试 Runner（tests.ts 权重计分） ===== */
 interface TestOption {
   t: string;
@@ -740,7 +764,7 @@ export default function WidgetBody({ id }: WidgetBodyProps) {
     if (game.engine === 'ball') return <BallToy />;
     if (game.engine === 'rps') return <RpsToy />;
     const Engine = ENGINES[game.engine];
-    if (Engine) return <Engine id={game.id} params={game.params ?? {}} />;
+    if (Engine) return <EngineHost key={game.id} game={game} engine={Engine} />;
   }
   switch (id) {
     case 'quiz':
