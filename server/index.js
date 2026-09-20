@@ -10,7 +10,7 @@ import { createServer } from 'node:http';
 import { createReadStream, existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, normalize, resolve } from 'node:path';
 import { CFG, PLUGIN_TABLE, tableState } from './config.js';
-import { fetchAllRows, addRows, editRows } from './mingdao.js';
+import { fetchAllRows, addRows, editRows } from './hap.js';
 import { splitTask, generateModule, imageDescription } from './ai.js';
 
 const DIST = resolve(new URL('.', import.meta.url).pathname, '..', 'web', 'dist');
@@ -104,24 +104,24 @@ async function handleCap(pluginId, method, { input, files }, res, isStream) {
   const tableKey = PLUGIN_TABLE[pluginId];
   if (tableKey) {
     const t = CFG.tables[tableKey];
-    if (!t.worksheetId) throw new Error(`表「${tableKey}」未配置 worksheetId（环境变量 MD_WS_${tableKey.toUpperCase()}）`);
+    if (!t.worksheetId) throw new Error(`表「${tableKey}」未配置 worksheetId（环境变量 MD_WS_${tableKey.toUpperCase()}，先跑 node scripts/seed-mingdao.mjs）`);
     if (method === 'searchRecords') {
       // 客户端会按 hasMore 分页循环；服务端一次给全量，循环一次即结束
-      const rows = await fetchAllRows(t.worksheetId, t.viewId);
+      const rows = await fetchAllRows(tableKey);
       log(`[cap] ${tableKey}.searchRecords → ${rows.length} 行`);
       return sendJson(res, 200, { records: rows, hasMore: false });
     }
     if (method === 'batchAddRecords') {
       const records = input.records ?? [];
       if (records.length === 0) return sendJson(res, 200, { success: true });
-      await addRows(t.worksheetId, records);
+      await addRows(tableKey, records);
       log(`[cap] ${tableKey}.batchAddRecords ← ${records.length} 行`);
       return sendJson(res, 200, { success: true });
     }
     if (method === 'batchUpdateRecords') {
       const records = input.records ?? [];
       if (records.length === 0) return sendJson(res, 200, { success: true });
-      await editRows(t.worksheetId, records);
+      await editRows(tableKey, records);
       log(`[cap] ${tableKey}.batchUpdateRecords ← ${records.length} 行`);
       return sendJson(res, 200, { success: true });
     }
