@@ -1,0 +1,13 @@
+/* 字体自托管（@fontsource，随构建打包），避免外网 Google Fonts 阻塞 */
+@import "@fontsource/space-grotesk/400.css";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/noto-sans-sc/400.css";
+@import "@fontsource/noto-sans-sc/500.css";
+@import "@fontsource/noto-sans-sc/600.css";
+@import "@fontsource/noto-sans-sc/700.css";
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./tailwind-theme.css";
+@import "./typography.css";

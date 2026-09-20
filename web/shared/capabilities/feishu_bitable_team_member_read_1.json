@@ -1,0 +1,17 @@
+{
+  "id": "feishu_bitable_team_member_read_1",
+  "pluginKey": "@official-plugins/feishu-bitable",
+  "pluginVersion": "1.0.22",
+  "name": "读取飞书多维表格团队成员数据",
+  "description": "读取Base「新人助手 Onboarding Helper」中「团队成员」表的所有数据，用于工作台运行时展示和使用。",
+  "icon": "",
+  "paramsSchema": {},
+  "formValue": {
+    "appToken": "SzvXbwLAxaSPIMsQRO2chtsjnUb",
+    "tableID": "tblfiOub4vLHpTkL",
+    "fields": []
+  },
+  "createdAt": 1789808398211,
+  "updatedAt": 1789808398211,
+  "createdBy": 7680898433045040306
+}

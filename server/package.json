@@ -1,0 +1,14 @@
+{
+  "name": "persona-dash-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "个人成长后台代理服务：明道云 HAP v2 开放 API + 智谱 AI + 静态托管（零依赖 Node ≥ 18）",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  }
+}

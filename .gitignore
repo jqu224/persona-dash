@@ -1,0 +1,21 @@
+# 依赖与构建产物
+node_modules/
+web/dist/
+web/node_modules/.tmp/
+
+# 密钥（绝不提交）
+server/.env
+.env
+.env.local
+*.local
+
+# 系统
+.DS_Store
+
+# 参考（原始妙搭导出，仅留档；如不想公开可整行删掉后从远端移除）
+# ref/
+
+# IDE / 工具
+.zcode/
+.vscode/
+.idea/

@@ -1,0 +1,31 @@
+{
+  "id": "feishu_bitable_onboarding_task_update_1",
+  "pluginKey": "@official-plugins/feishu-bitable",
+  "pluginVersion": "1.0.22",
+  "name": "入职任务状态更新插件",
+  "description": "绑定新人助手多维表格的入职任务数据表，提供任务状态批量更新能力，支持根据record_id更新任务状态为未开始/进行中/已完成",
+  "icon": "",
+  "paramsSchema": {},
+  "formValue": {
+    "tableID": "tblzvJL3t8Jg0ZK0",
+    "fields": [
+      {
+        "type": 3,
+        "writeable": true,
+        "bizType": "SingleSelect",
+        "enumValues": [
+          "未开始",
+          "进行中",
+          "已完成"
+        ],
+        "id": "fldTaskStatus",
+        "name": "任务状态",
+        "readable": true
+      }
+    ],
+    "appToken": "SzvXbwLAxaSPIMsQRO2chtsjnUb"
+  },
+  "createdAt": 1789809312700,
+  "updatedAt": 1789809312700,
+  "createdBy": 7680898433045040306
+}
