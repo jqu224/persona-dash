@@ -1,49 +1,48 @@
 <div align="center">
-  <img src="docs/assets/hero.svg" alt="persona-dash — personal growth workspace on a Mingdao HAP backend" width="100%">
+  <img src="docs/assets/hero.svg" alt="persona-dash — personal growth workbench, local-first, pluggable data plane" width="100%">
 </div>
 
 <div align="center">
-<pre>~/persona-dash (main*)   mingdao hap · 6 worksheets   glm-4-flash · 3 ai flows   zero-dep node :8787</pre>
+<pre>~/persona-dash (main*)   local-first · pluggable data plane   glm-4-flash · 3 ai flows   zero-dep node :8787</pre>
 </div>
 
 <div align="center">
 
-[![English](https://img.shields.io/badge/lang-English-61B65D?style=for-the-badge&labelColor=0d1117)](README.md)
+[![English](https://img.shields.io/badge/lang-English-295243?style=for-the-badge&labelColor=0d1117)](README.md)
 [![中文](https://img.shields.io/badge/lang-%E4%B8%AD%E6%96%87-8b949e?style=for-the-badge&labelColor=0d1117)](README.zh-CN.md)
 
 </div>
 
 ## persona-dash
 
-**The growth workspace where the no-code platform is the database**
+**An open-box personal growth workbench for people and coding agents**
 
-A daily growth workbench where every card, task and progress bar is a real [Mingdao HAP](https://www.mingdao.com) worksheet row — and AI genuinely joins the loop: splitting one-line tasks into subtasks, generating learning modules from a sentence, writing task descriptions from a reference image.
+A daily growth workspace you can run on localhost. The target default data plane is a **local folder** (zero account). Today the shipped adapter is [Mingdao HAP](https://www.mingdao.com) worksheets via `server/`; Feishu docs / Tencent docs and host shims (workbuddy, Feishu webapp, Miaoda-shaped `capabilityClient`) are on the roadmap. AI stays on the critical path: split one-line tasks, generate learning modules from a sentence, write task descriptions from a reference image.
 
-![status](https://img.shields.io/badge/status-live-61B65D?style=flat-square)
-![backend](https://img.shields.io/badge/backend-mingdao%20hap%20%C2%B7%206%20worksheets-919DF4?style=flat-square)
-![ai](https://img.shields.io/badge/ai-glm--4--flash%20%C2%B7%203%20flows-61B65D?style=flat-square)
-![runtime](https://img.shields.io/badge/runtime-zero%20dep%20node%20%E2%89%A5%2018-8b949e?style=flat-square)
-![target](https://img.shields.io/badge/target-personal%20growth%20workspace-919DF4?style=flat-square)
+![status](https://img.shields.io/badge/status-oss-295243?style=flat-square)
+![data](https://img.shields.io/badge/data-local--first%20%C2%B7%20pluggable-555555?style=flat-square)
+![ai](https://img.shields.io/badge/ai-glm--4--flash%20%C2%B7%203%20flows-295243?style=flat-square)
+![runtime](https://img.shields.io/badge/runtime-zero%20dep%20node%20%E2%89%A5%2018-555555?style=flat-square)
+![hosts](https://img.shields.io/badge/hosts-localhost%20%C2%B7%20embeddable-555555?style=flat-square)
 
-Zero-code on the admin side, real AI on the critical path — reshape fields, views and automations in HAP while the app keeps running.
+Built for ToC users and agent hosts (Codex, WorkBuddy, QCoder, Qwen Work, Doubao Work, and peers): plain webapp now, embeddable under workbuddy / Feishu / Miaoda-shaped capability APIs.
 
 ***Tips for getting started:***
 
-1. Read [`docs/mingdao-setup.md`](docs/mingdao-setup.md) — PAT auth, app id, and how the 6 worksheets get provisioned.
-2. Run the three commands in [Run it](#run-it) — configure `.env`, seed the backend, start the server.
-3. Open `http://127.0.0.1:8787` — the footer confirms the backend is live; AI entry points degrade to local demo corpora until a key is set.
+1. Skim [Positioning](#positioning) — local-folder default target vs the Mingdao adapter that runs today.
+2. Run the three commands in [Run it](#run-it) — configure `.env`, optionally seed Mingdao, start the server.
+3. Open `http://127.0.0.1:8787` — footer shows backend status; AI entry points degrade to local demo corpora until a key is set.
 
 ---
 
 ## Positioning
 
-Most "AI workbench" demos wire the UI to a mock JSON file and stop there. This repo flips the stack: the zero-code platform owns the data, AI handles real writing jobs, and the React app stays a thin workbench on top.
-
 | Layer | What it means |
 | --- | --- |
-| **Data** | Mingdao HAP worksheets are the single source of truth — every card, task and progress bar reads/writes real rows via the official MCP channel (`get_record_list` / `batch_create_records` / `update_record`, Bearer PAT auth) |
+| **Data plane** | Pluggable. **Default target:** local folder on disk. **Shipped today:** Mingdao HAP worksheets over MCP (`get_record_list` / `batch_create_records` / `update_record`, Bearer PAT). Next: Feishu docs / bitable, Tencent docs |
 | **AI** | Zhipu glm-4-flash (OpenAI-compatible) on the critical path: one-line task → 3–6 executable subtasks; one sentence → vocabulary/quiz module; reference image → streamed task description |
-| **Frontend** | React 19 + Vite + Tailwind v4 workbench, de-platformed from a Miaoda export; still calls the Miaoda-style `capabilityClient` |
+| **Frontend** | React 19 + Vite + Tailwind v4 workbench; calls a Miaoda-shaped `capabilityClient` so host shims stay thin |
+| **Hosts** | Localhost webapp out of the box; designed to embed under workbuddy / Feishu webapp / Miaoda |
 | **Degradation** | Backend unreachable → local seed data, no white screens; `AI_API_KEY` unset → local demo corpora, no dead buttons |
 
 ## Pipeline
@@ -53,15 +52,16 @@ web/                      React 19 workbench
   │  fetch /api/cap/:plugin/:method   ← capabilityClient-shaped shim, UI untouched
   ▼
 server/                   zero-dependency Node — API + static hosting on :8787
-  ├─ hap.js  ── MCP channel (Bearer PAT) ──►  Mingdao HAP · 6 worksheets
+  ├─ data adapter (today: hap.js → Mingdao HAP)
+  │                 (target: local folder · Feishu · Tencent docs)
   └─ ai.js   ── OpenAI-compatible API ─────►  Zhipu glm-4-flash
   ▲
-  └─ HAP unreachable → local seed data · no AI key → local demo corpora
+  └─ adapter unreachable → local seed data · no AI key → local demo corpora
 ```
 
 | Flow | Input | Output | Gate |
 | --- | --- | --- | --- |
-| **Task sync** | toggles and creates in the UI | real row changes in the worksheets (`batch_create_records` / `update_record`) | HAP unreachable → local seed data |
+| **Task sync** | toggles and creates in the UI | row changes in the active data plane | adapter unreachable → local seed data |
 | **Quick create** | one-line task | 3–6 executable subtasks | no `AI_API_KEY` → local demo split |
 | **My modules** | one sentence | vocabulary / quiz module | no `AI_API_KEY` → local demo corpora |
 | **Image → description** | reference image | streamed, ready-to-use task description | no `AI_API_KEY` → local demo |
@@ -71,30 +71,31 @@ server/                   zero-dependency Node — API + static hosting on :8787
 | Path | Role |
 | --- | --- |
 | `web/` | React 19 + Vite + Tailwind v4 workbench |
-| `server/` | Zero-dependency Node proxy — HAP MCP + Zhipu AI + static hosting |
-| `scripts/` | `seed-mingdao.mjs` (provisioning), `mcp.mjs` (HAP MCP CLI helper), `gen-seed-csv.mjs` (CSV export) |
-| `docs/` | `mingdao-setup.md` — backend provisioning & auth notes |
-| `mingdao-seed/` | CSV fallback for manual import |
+| `server/` | Zero-dependency Node proxy — data adapter + Zhipu AI + static hosting |
+| `scripts/` | `seed-mingdao.mjs` (optional Mingdao provision), `mcp.mjs`, `gen-seed-csv.mjs` |
+| `docs/` | `mingdao-setup.md` — optional Mingdao adapter setup |
+| `mingdao-seed/` | CSV fallback for manual Mingdao import |
 
 ## Contracts
 
 | Contract | Rule |
 | --- | --- |
-| **Platform owns the data** | Worksheets are the only write target — admins reshape fields, views and automations in HAP while the app keeps working; the app keeps no private database |
-| **Shim signature** | `web/` still calls the Miaoda-shaped `capabilityClient`; `server/` serves the same shape at `/api/cap/:plugin/:method`, so the UI layer needed zero rewrites |
-| **Graceful degradation** | Backend unreachable → local seed data; `AI_API_KEY` unset → local demo corpora. No white screens, no dead buttons |
-| **Secrets** | PAT and AI keys live only in `server/.env` (git-ignored); the repo contains no instance identifiers — the running instance lives in a separate private repo |
+| **Data plane owns persistence** | The active adapter is the write target; the app keeps no private database of its own |
+| **Shim signature** | `web/` calls Miaoda-shaped `capabilityClient`; `server/` serves the same shape at `/api/cap/:plugin/:method` |
+| **Graceful degradation** | Adapter unreachable → local seed data; `AI_API_KEY` unset → local demo corpora |
+| **Secrets** | Tokens and AI keys live only in `server/.env` (git-ignored); this public tree holds no instance credentials |
 
 ## Run it
 
-Prerequisites: Node ≥ 18, a Mingdao HAP account with a **Personal Access Token** (avatar → Authorization & Access → Add), optionally a [Zhipu](https://open.bigmodel.cn) API key.
+Prerequisites: Node ≥ 18. Optional today: a Mingdao HAP **Personal Access Token** and app id (see [`docs/mingdao-setup.md`](docs/mingdao-setup.md)). Optional: a [Zhipu](https://open.bigmodel.cn) API key. Without Mingdao credentials the UI still boots on local seed data.
 
 ```bash
 # 1. configure
 cp server/.env.example server/.env
-#    fill MINGDAO_PAT=pat_xxx (and MD_APP_ID with your HAP app id)
+#    optional: MINGDAO_PAT=pat_xxx and MD_APP_ID=...
+#    optional: AI_API_KEY=...
 
-# 2. provision the backend (idempotent): creates 6 worksheets + seed rows
+# 2. optional — provision Mingdao worksheets (idempotent)
 node scripts/seed-mingdao.mjs
 
 # 3. run
@@ -103,15 +104,15 @@ node server/index.js          # serves API + built frontend on :8787
 cd web && npm install && npm run dev   # Vite dev server proxies /api to :8787
 ```
 
-Open `http://127.0.0.1:8787` — the footer should say the backend is live.
+Open `http://127.0.0.1:8787`.
 
 ## For operators
 
 | Topic | How |
 | --- | --- |
-| **Deploy** | Any Node host works. On [Zeabur](https://zeabur.com): push the repo → one service from `server/` (it already serves `web/dist`) → set the env vars from `server/.env.example` |
-| **Embed** | Put the HTTPS URL into a Mingdao custom page via the "Embed URL" component — the workspace becomes a native-looking HAP page |
-| **Provision** | `scripts/seed-mingdao.mjs` is idempotent — rerun any time; details in [`docs/mingdao-setup.md`](docs/mingdao-setup.md) |
+| **Deploy** | Any Node host. On [Zeabur](https://zeabur.com): push the repo → one service from `server/` (serves `web/dist`) → set env vars from `server/.env.example` |
+| **Embed** | Point a host webview / custom page at the HTTPS URL (workbuddy, Feishu, Mingdao embed URL, and similar) |
+| **Mingdao adapter** | `scripts/seed-mingdao.mjs` is idempotent; details in [`docs/mingdao-setup.md`](docs/mingdao-setup.md) |
 
 ## License
 
