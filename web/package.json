@@ -2,6 +2,7 @@
   "name": "persona-dash-web",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "个人成长后台 · 每日成长工作台（React 19 + Vite，数据接明道云 HAP 开放 API）",
   "type": "module",
   "scripts": {
